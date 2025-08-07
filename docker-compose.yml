@@ -1,0 +1,14 @@
+services:
+
+  pg:
+    env_file: 
+      - ".env"
+      # - ".env.example"
+    image: postgres
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: "${DATABASE_NAME}"
+      POSTGRES_USER: "${DATABASE_USER}"
+      POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
+    ports:
+      - "${DATABASE_PORT}:5432"
