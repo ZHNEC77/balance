@@ -1,16 +1,69 @@
-from rest_framework import generics
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate, login
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
+from rest_framework.exceptions import PermissionDenied
 
 
-class UserList(generics.ListAPIView):
+class UserListView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = User.objects.all()
+
+
+class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        if self.kwargs.get('pk') == 'me':
+            return self.request.user
+        obj = super().get_object()
+        if obj != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied("Вы можете просматривать только свой профиль")
+        return obj
 
 
-class UserDetail(generics.RetrieveAPIView):
-    # queryset = User.objects.all()
-    serializer_class = UserSerializer
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = RegisterSerializer
 
-    def get_queryset(self):
-        return User.objects.filter(pk=self.kwargs['pk'])
+    def perform_create(self, serializer):
+        user = serializer.save()
+        if user:
+            # Создаем токен для нового пользователя
+            Token.objects.create(user=user)
+            # TODO
+            # Создаем баланс для нового пользователя (если нужно)
+            # from balance.models import UserBalance
+            # UserBalance.objects.create(user=user, amount=0)
+
+
+class LoginView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = authenticate(
+                username=serializer.validated_data['username'],
+                password=serializer.validated_data['password']
+            )
+            if user:
+                login(request, user)
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({
+                    'token': token.key,
+                    'user_id': user.id,
+                    'username': user.username
+                })
+            return Response(
+                {'error': 'Invalid Credentials'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
