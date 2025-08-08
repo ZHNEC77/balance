@@ -2,7 +2,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from .models import User
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 from rest_framework.exceptions import PermissionDenied
@@ -24,7 +24,8 @@ class UserDetailView(generics.RetrieveAPIView):
             return self.request.user
         obj = super().get_object()
         if obj != self.request.user and not self.request.user.is_staff:
-            raise PermissionDenied("Вы можете просматривать только свой профиль")
+            raise PermissionDenied(
+                "Вы можете просматривать только свой профиль")
         return obj
 
 
@@ -38,10 +39,6 @@ class RegisterView(generics.CreateAPIView):
         if user:
             # Создаем токен для нового пользователя
             Token.objects.create(user=user)
-            # TODO
-            # Создаем баланс для нового пользователя (если нужно)
-            # from balance.models import UserBalance
-            # UserBalance.objects.create(user=user, amount=0)
 
 
 class LoginView(APIView):
@@ -67,3 +64,34 @@ class LoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Удаляем токен пользователя
+            request.user.auth_token.delete()
+            return Response(
+                {"detail": "Successfully logged out."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    # def post(self, request):
+    #     try:
+    #         Token.objects.filter(user=request.user).delete()
+    #         logout(request)
+    #         return Response(
+    #             {"detail": "Successfully logged out."},
+    #             status=status.HTTP_200_OK
+    #         )
+    #     except Exception as e:
+    #         return Response(
+    #             {"error": str(e)},
+    #             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    #         )

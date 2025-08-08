@@ -3,13 +3,15 @@ from .views import (
     RegisterView,
     LoginView,
     UserListView,
-    UserDetailView
+    UserDetailView,
+    LogoutView,
 )
 
 urlpatterns = [
+    path('', UserListView.as_view(), name='user-list'),
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
-    path('users/', UserListView.as_view(), name='user-list'),
-    path('users/<pk>/', UserDetailView.as_view(), name='user-detail'),
-    path('users/me/', UserDetailView.as_view(), name='current-user'),
+    path('<pk>/', UserDetailView.as_view(), name='user-detail'),
+    path('me/', UserDetailView.as_view(), name='current-user'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]
