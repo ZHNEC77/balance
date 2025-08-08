@@ -71,8 +71,8 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            # Удаляем токен пользователя
-            request.user.auth_token.delete()
+            Token.objects.filter(user=request.user).delete()
+            logout(request)
             return Response(
                 {"detail": "Successfully logged out."},
                 status=status.HTTP_200_OK
@@ -82,16 +82,3 @@ class LogoutView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    # def post(self, request):
-    #     try:
-    #         Token.objects.filter(user=request.user).delete()
-    #         logout(request)
-    #         return Response(
-    #             {"detail": "Successfully logged out."},
-    #             status=status.HTTP_200_OK
-    #         )
-    #     except Exception as e:
-    #         return Response(
-    #             {"error": str(e)},
-    #             status=status.HTTP_500_INTERNAL_SERVER_ERROR
-    #         )
