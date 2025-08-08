@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 
     # my_app
     'users.apps.UsersConfig',
-
+    'balance.apps.BalanceConfig',
     # DRF
     'rest_framework',
     'rest_framework.authtoken',
