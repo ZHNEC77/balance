@@ -2,8 +2,8 @@ services:
 
   pg:
     env_file: 
-      - ".env"
-      # - ".env.example"
+      # - ".env"
+      - ".env.example"
     image: postgres
     container_name: postgres_container
     environment:
