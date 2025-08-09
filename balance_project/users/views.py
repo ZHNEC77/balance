@@ -68,6 +68,7 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['post', 'options']
 
     def post(self, request):
         try:
