@@ -6,6 +6,8 @@ from django.contrib.auth import authenticate, login, logout
 from .models import User
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 from rest_framework.exceptions import PermissionDenied
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 class UserListView(generics.ListAPIView):
@@ -44,6 +46,31 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
 
+    @swagger_auto_schema(
+        operation_description="Аутентификация пользователя",
+        request_body=LoginSerializer,
+        responses={
+            200: openapi.Response(
+                description="Успешная аутентификация",
+                examples={
+                    "application/json": {
+                        "token": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
+                        "user_id": 1,
+                        "username": "admin"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Неверные данные",
+                examples={
+                    "application/json": {
+                        "username": ["Это поле обязательно."],
+                        "password": ["Это поле обязательно."]
+                    }
+                }
+            )
+        }
+    )
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
