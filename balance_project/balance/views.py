@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import UserBalance, BalanceTransaction
 from .serializers import (
     BalanceSerializer,
@@ -28,6 +30,15 @@ class BalanceView(APIView):
 class DepositView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        request_body=DepositSerializer,
+        responses={
+            200: openapi.Response('Успешное пополнение', BalanceSerializer),
+            400: openapi.Response('Ошибка валидации'),
+            401: openapi.Response('Не авторизован')
+        },
+        operation_description="Пополнение баланса пользователя"
+    )
     def post(self, request):
         serializer = DepositSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -54,6 +65,24 @@ class DepositView(APIView):
 class TransferView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        request_body=TransferSerializer,
+        responses={
+            200: openapi.Response('Успешный перевод', examples={
+                'application/json': {
+                    "status": "success",
+                    "sender_balance": 100.0,
+                    "recipient_balance": 50.0
+                }
+            }),
+            400: openapi.Response('Ошибка', examples={
+                'application/json': {
+                    "error": "Недостаточно средств"
+                }
+            })
+        },
+        operation_description="Перевод средств другому пользователю"
+    )
     def post(self, request):
         serializer = TransferSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

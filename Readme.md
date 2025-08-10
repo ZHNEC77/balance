@@ -32,6 +32,9 @@ python manage.py runserver
 
 ## API Endpoints
 
+### можно попробовать обратиться к ручкам через http://127.0.0.1:8000/swagger/
+### авторизация через Autorize и в value Token ваш_токен
+
 ### 1. Регистрация
 POST http://127.0.0.1:8000/api/users/register/
 

@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     # DRF
     'rest_framework',
     'rest_framework.authtoken',
+
+    # docs
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -154,4 +157,21 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Введите: Token <ваш_токен>'
+        }
+    },
+    'USE_SESSION_AUTH': False,
+    'JSON_EDITOR': True,
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
+    'SHOW_REQUEST_HEADERS': True,
+    'LOGIN_URL': '/api/users/login/',
+    'LOGOUT_URL': '/api/users/new/logout/',
 }
