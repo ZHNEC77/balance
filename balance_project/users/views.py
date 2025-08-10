@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate, login, logout
-from .models import User
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 from rest_framework.exceptions import PermissionDenied
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from .models import User
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 
 
 class UserListView(generics.ListAPIView):
